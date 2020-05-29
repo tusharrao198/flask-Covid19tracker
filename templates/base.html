@@ -1,0 +1,102 @@
+{% extends 'bootstrap/base.html' %}
+
+
+
+
+  {% block title %}  Covid19 Cases- INDIA {% endblock %}
+  {% block styles %}
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+{% endblock %}
+
+
+{% block body %}
+
+  {% block navbar %}
+    {% include '_navbar.html' %}
+  {% endblock %}
+
+  <style>
+
+
+
+body {
+  background-image: url('../static/6.png');
+  -webkit-background-size: auto;
+  -moz-background-size: auto;
+  background-size: auto;
+  -o-background-size: auto;
+}
+
+table{
+  color:#000000;
+	border-spacing: 0;
+	border: 1px solid #83f22e;
+	border-radius: 5px 5px 0 0;
+  background: #808080;
+
+}
+
+th {
+
+		color: #FFFFFF;
+    font-weight:bold;
+	  border: 2px solid #FFFFFF;
+		background-color:#228B22;
+   	background-repeat: no-repeat;
+}
+td {
+		background: #7AD7F0;
+		color: #808080;
+		border: 2px solid #00000;
+		text-align: center;
+    padding:2%;
+	}
+
+table, th {
+
+  	    padding: 1%;
+  	}
+tr th:first-child, tr td:first-child {
+    		text-align: left;
+
+}
+
+tr td {
+		opacity: 2.0;
+    color:#FFFFFF;
+    font-weight: bold;
+    font-size:120%;
+    background-color:#151E3D;
+
+  }
+
+tr td:focus{
+  opacity:1.5;
+  font-size:140%;
+  background-color:#e226ff;
+  font-weight:bold;
+}
+
+tr:hover {
+  		opacity: 4.5;
+  		text-align: center;
+  		font-size: 140%;
+      background-color: #808080;
+      color:#000000;
+      font-weight:bold;
+  	}
+
+
+</style>
+
+  {% block content %}
+
+  {% endblock %}
+  {% block scripts %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  {% block sub_content %}
+    {% endblock %}
+{% endblock %}
+
+{% endblock %}
