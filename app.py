@@ -11,6 +11,11 @@ Bootstrap(app)
 
 app.config['SECRET_KEY'] = 'secret'
 
+# ignoring ssl error
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
 @app.route('/' ,methods=["GET","POST"])
 def index():
 
@@ -23,23 +28,13 @@ def index():
     recovered INTEGER  )
     """)
 
-
-
-    # ignoring ssl error
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-
     # Connecting to url
     url = "https://api.rootnet.in/covid19-in/stats/latest"
-    url1 = "https://api.covid19india.org/state_district_wise.json"
     fh = urllib.request.urlopen(url , context=ctx)
-    fh1 = urllib.request.urlopen(url1 , context=ctx)
     # .read() reads whole as a string
     data = fh.read().decode()
-    data1 = fh1.read().decode()
+
     js = json.loads(data)
-    js1 = json.loads(data1)
 
     Totalcases=js["data"]["summary"]["total"]
     lastRefreshed=js["lastRefreshed"]
@@ -72,10 +67,6 @@ def states():
     active INTEGER , recovered INTEGER )
     """)
 
-    # ignoring ssl error
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
     url1 = "https://api.covid19india.org/state_district_wise.json"
     fh1 = urllib.request.urlopen(url1 , context=ctx)
     # .read() reads whole as a string
@@ -93,7 +84,7 @@ def states():
             deaths = js1[state_name]["districtData"][city_name]["deceased"]
             cur1.execute("INSERT OR REPLACE INTO districts(state_name, city_name, confirmed, deaths, active, recovered) VALUES(?, ?, ?, ?, ?, ?)" , (state_name, city_name, confirmed, deaths, active, recovered))
             #cur1.execute("UPDATE districts SET  VALUES(?, ?, ?, ?, ?, ?)" , (state_name, city_name, confirmed, deaths, active, recovered))
-
+        #insert or eplace command do both insert and update at the same time
     conn1.commit()
     cur1.execute("SELECT * FROM districts ")
     row1 = cur1.fetchall()
@@ -103,37 +94,26 @@ def states():
 
 @app.route('/search',methods=["GET","POST"])
 def search():
-    def correction(word):
-        a=list(word)
-        for i in range(len(a)):
-            if a[i]==" ":
-                print("true")
-                s=a[0].upper()
-                a[0] = s
-                d=a[i+1].upper()
-                a[i+1] = d
-            else:
-                s=a[0].upper()
-                a[0]=s
-        gg=""
-        for j in a:
-            gg+=j
-        return gg
+    url1 = "https://api.covid19india.org/state_district_wise.json"
+    fh1 = urllib.request.urlopen(url1 , context=ctx)
+    # .read() reads whole as a string
+    data1 = fh1.read().decode()
+    js1 = json.loads(data1)
 
-
+    lst=[]
+    for states in js1:
+        for cities in js1[states]["districtData"]:
+            lst.append(cities)
+    # taking input from html form
     if request.method=="POST":
-        state_name = request.form.get("State")
-        state1 = correction(state_name)
-        city_name = request.form.get("City")
-        city1 = correction(city_name)
-        #print("1:",state_name)
-        #print(city1)
+        state_name = request.form.get("state")
+        city_name = request.form.get("city")
         session['search'] =True
-        session['state_name'] = state1
-        session['city_name'] = city1
+        session['state_name'] = state_name
+        session['city_name'] = city_name
 
         return redirect('/show')
-    return render_template('search.html')
+    return render_template('search.html', states=js1 , cities=lst)
 
 @app.route('/show')
 def show():
