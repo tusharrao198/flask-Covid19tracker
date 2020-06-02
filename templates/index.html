@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
     {% block content %}
-
+    <h5 align="right" style="color: white" ><b>Last Updated :{{Date}}<br>Time:{{Time}}</b></h5>
      <h1 align ="center" style="color:Green"><b>COVID-19 Cases Statewise</b> </h1>
      <header ></header>
-     <h2 align ="center" style="color:red"> <b>Total cases in India ={{ Totalcases}}</b> </h2>
+     <h2 align ="center" style="color:red"> <b>Total cases in India = {{ Totalcases}}</b> (+{{increment}}) </h2>
      <h1 align ="center"style="color: white" ><b> Cases in Each State - Table</b></h1>
-     <h5 align="right" style="color: white" >{{"LastRefreshed:",refreshed}}</h5>
+
 
    <div class="container">
 

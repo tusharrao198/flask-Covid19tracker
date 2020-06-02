@@ -1,10 +1,10 @@
-from flask import Flask , request, render_template, session, url_for,redirect
+from flask import Flask , request, render_template, session, url_for, redirect
 import sqlite3
 import json
 import ssl
 from flask_bootstrap import Bootstrap
 import urllib.request ,urllib.error
-
+from datetime import datetime
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -15,6 +15,14 @@ app.config['SECRET_KEY'] = 'secret'
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
+
+#function for opening url
+def open(url):
+    fh= urllib.request.urlopen(url , context=ctx)
+    # .read() reads whole as a string
+    data= fh.read().decode()
+    js= json.loads(data)
+    return js
 
 @app.route('/' ,methods=["GET","POST"])
 def index():
@@ -30,15 +38,37 @@ def index():
 
     # Connecting to url
     url = "https://api.rootnet.in/covid19-in/stats/latest"
-    fh = urllib.request.urlopen(url , context=ctx)
-    # .read() reads whole as a string
-    data = fh.read().decode()
+    js =open(url)
 
-    js = json.loads(data)
-
+    # Connecting to url of datewise cases
+# cases increment
     Totalcases=js["data"]["summary"]["total"]
-    lastRefreshed=js["lastRefreshed"]
+    session['Totalcases'] = Totalcases
+    url2 = "https://api.rootnet.in/covid19-in/stats/history"
+    js2 = open(url2)
 
+    # cases incement of last two days in  INDIA
+    dict_inc={}
+    for i in range(len(js2['data'])):
+      #info_datewise = i
+      if i >= (len(js2['data'])-2):
+          cases_state = [js2['data'][i]['summary']['total'], js2['data'][i]['summary']['deaths'], js2['data'][i]['summary']['discharged']]
+          dict_inc[js2['data'][i]['day']] = cases_state
+    # finding increase in cases per day
+    len_dict = len(list(dict_inc))
+    day_before = list(dict_inc)[0]
+    last = list(dict_inc)[1]
+    #print(day_before)
+    #print(last)
+    inc = dict_inc[last][0]-dict_inc[day_before][0]
+
+# datetime conversion
+    lastRefreshed=js["lastRefreshed"]
+    convert = datetime.strptime(lastRefreshed,"%Y-%m-%dT%H:%M:%S.%fZ")
+    Date =convert.date()
+    Time =convert.time()
+
+###########################
     for i in js["data"]["regional"]:
         state_name = i["loc"]
         confirmed= i["totalConfirmed"]
@@ -49,9 +79,9 @@ def index():
     conn.commit()
     cur.execute("SELECT * FROM states ORDER BY confirmed DESC ")
     row = cur.fetchall()
+###########################################
 
-
-    return render_template('index.html',states=row ,Totalcases=Totalcases, refreshed =lastRefreshed)
+    return render_template('index.html',states=row ,Totalcases=Totalcases, Date =Date , Time=Time, increment= inc)
 
 
 #@app.route('/<_stateid>',methods=["GET","POST"])
@@ -68,11 +98,7 @@ def states():
     """)
 
     url1 = "https://api.covid19india.org/state_district_wise.json"
-    fh1 = urllib.request.urlopen(url1 , context=ctx)
-    # .read() reads whole as a string
-    data1 = fh1.read().decode()
-
-    js1 = json.loads(data1)
+    js1 = open(url1) #######calling function
 
     for state in js1:
         state_name = state
@@ -89,16 +115,13 @@ def states():
     cur1.execute("SELECT * FROM districts ")
     row1 = cur1.fetchall()
 
-    return render_template('states.html', states=row1)
+    return render_template('states.html', states=row1 , Totalcases=session['Totalcases'])
 
 
 @app.route('/search',methods=["GET","POST"])
 def search():
     url1 = "https://api.covid19india.org/state_district_wise.json"
-    fh1 = urllib.request.urlopen(url1 , context=ctx)
-    # .read() reads whole as a string
-    data1 = fh1.read().decode()
-    js1 = json.loads(data1)
+    js1 = open(url1)
 
     lst=[]
     for states in js1:
