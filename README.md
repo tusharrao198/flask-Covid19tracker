@@ -2,6 +2,11 @@
 This site lets you track no. of Covid-19 cases all over India, in your State, city.
 Created by Tushar Rao
 
+Framework used  :- Flask
+Language :- Python 
+
+API :- https://api.rootnet.in/
+
 First,create a virtual environment
 To install virtual env
 pip3 install virtualenv
