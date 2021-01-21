@@ -23,5 +23,3 @@ source venv/bin/activate
 
 After Actuvating the venv, now you can install the requirements,
 to install requirements use, ## pip3 inistall -r requirements.txt
-
-Link to Site: - http://tusharrao198.pythonanywhere.com/
